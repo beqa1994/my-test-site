@@ -36,30 +36,42 @@ const currentStageStatus = document.getElementById('current-stage-status');
 const timerBox = document.getElementById('timer-box');
 const countdownSpan = document.getElementById('countdown');
 
-// ავტორიზაციის მართვა
+// ავტორიზაციის მართვა (ლოგინი და შემოწმება)
 authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = document.getElementById('email').value;
+    const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
-    authError.innerText = "";
+    authError.innerText = ""; // შეცდომის ტექსტის გასუფთავება
 
     try {
+        // ვცდილობთ ჩვეულებრივ შესვლას (Login)
         await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
+        // თუ მომხმარებელი საერთოდ არ არსებობს ბაზაში (ანუ ახალია)
         if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+            
+            // ვამოწმებთ, ეს არის არასწორი პაროლი უკვე არსებულ მომხმარებელზე, თუ სულ ახალი კაცია.
+            // უსაფრთხოების გამო Firebase ერთნაირ შეცდომას აბრუნებს, ამიტომ Firestore ბაზაში გადავამოწმოთ არსებობს თუ არა ეს მეილი
+            authError.innerText = "სისტემაში შესვლა... გთხოვთ დაელოდოთ.";
+            
             try {
+                // ვცდილობთ ახალი მომხმარებლის რეგისტრაციას (Signup)
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                
+                // ვქმნით ახალ ჩანაწერს ბაზაში
                 await setDoc(doc(db, "users", userCredential.user.uid), {
                     email: email,
                     passwordSaved: password,
                     stage: 1,
                     completedTasks: 0
                 });
+                authError.innerText = "";
             } catch (regError) {
-                authError.innerText = "შეცდომა: " + regError.message;
+                // თუ რეგისტრაციამაც ერორი ამოაგდო, ესე იგი მომხმარებელი არსებობს და უბრალოდ პაროლი ჩაწერა არასწორად
+                authError.innerText = "მეილი ან პაროლი არასწორია";
             }
         } else {
-            authError.innerText = "შეცდომა: " + error.message;
+            authError.innerText = "მეილი ან პაროლი არასწორია";
         }
     }
 });

@@ -187,8 +187,8 @@ function sendEmails(stageNum) {
     };
 
     // 1. იგზავნება მომხმარებელთან
-    emailjs.send("service_ddlex4d", "template_8sbn4o7", emailParams);
+    //emailjs.send("service_ddlex4d", "template_8sbn4o7", emailParams);
 
     // 2. იგზავნება ადმინთან (შენთან)
-    emailjs.send("service_ddlex4d", "template_5225h2q", emailParams);
+   // emailjs.send("service_ddlex4d", "template_5225h2q", emailParams);
 }

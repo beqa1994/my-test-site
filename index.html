@@ -10,6 +10,8 @@
 <body>
 
     <div class="container">
+        <h1 class="main-title">სათაური</h1>
+
         <div id="auth-screen" class="box">
             <h2>ავტორიზაცია</h2>
             <p class="subtitle">შედით თქვენს კაბინეტში</p>
@@ -40,25 +42,40 @@
                     <div class="test-item">ტესტი 1</div>
                     <div class="test-item">ტესტ 70</div>
                     <div class="test-item">ტესტი 20</div>
-                    <button class="action-btn" onclick="startTimer(1, 5)">დაწყება</button>
+                    <button class="action-btn" id="start-btn-1" onclick="showInputBlock(1)">დაწყება</button>
+                    
+                    <div id="input-block-1" class="input-block hidden">
+                        <input type="text" id="user-text-1" placeholder="ჩაწერეთ რაიმე...">
+                        <button class="action-btn start1-btn" onclick="startTimer(1, 5)">დაწყება1</button>
+                    </div>
                 </div>
 
                 <div id="stage-2" class="stage hidden">
-                    <button class="action-btn next-btn" onclick="showStage2Tasks()">ტესტი 2</button>
+                    <button class="action-btn next-btn" id="next-trigger-2" onclick="showStage2Tasks()">ტესტი 2</button>
                     <div id="stage-2-tasks" class="hidden">
                         <div class="test-item">ტესტი 70</div>
                         <div class="test-item">ტესტი 50</div>
-                        <button class="action-btn" onclick="startTimer(2, 5)">დაწყება</button>
+                        <button class="action-btn" id="start-btn-2" onclick="showInputBlock(2)">დაწყება</button>
+                        
+                        <div id="input-block-2" class="input-block hidden">
+                            <input type="text" id="user-text-2" placeholder="ჩაწერეთ რაიმე...">
+                            <button class="action-btn start1-btn" onclick="startTimer(2, 5)">დაწყება1</button>
+                        </div>
                     </div>
                 </div>
 
                 <div id="stage-3" class="stage hidden">
-                    <button class="action-btn next-btn" onclick="showStage3Tasks()">შემდეგი</button>
+                    <button class="action-btn next-btn" id="next-trigger-3" onclick="showStage3Tasks()">შემდეგი</button>
                     <div id="stage-3-tasks" class="hidden">
                         <div class="test-item">ტესტი 3</div>
                         <div class="test-item">ტესტი 70</div>
                         <div class="test-item">ტესტი 100</div>
-                        <button class="action-btn" onclick="startTimer(3, 5)">დაწყება</button>
+                        <button class="action-btn" id="start-btn-3" onclick="showInputBlock(3)">დაწყება</button>
+                        
+                        <div id="input-block-3" class="input-block hidden">
+                            <input type="text" id="user-text-3" placeholder="ჩაწერეთ რაიმე...">
+                            <button class="action-btn start1-btn" onclick="startTimer(3, 5)">დაწყება1</button>
+                        </div>
                     </div>
                 </div>
 

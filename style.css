@@ -3,6 +3,8 @@
     --card-bg: #ffffff;
     --primary: #4f46e5;
     --primary-hover: #4338ca;
+    --start1-color: #10b981;
+    --start1-hover: #059669;
     --text: #1f2937;
     --text-muted: #6b7280;
     --border: #e5e7eb;
@@ -15,9 +17,19 @@ body {
     color: var(--text);
     margin: 0;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+}
+
+.main-title {
+    text-align: center;
+    font-size: 32px;
+    color: var(--primary);
+    margin-bottom: 20px;
+    font-weight: 800;
+    letter-spacing: 1px;
 }
 
 .container {
@@ -95,6 +107,22 @@ button:hover { background-color: var(--primary-hover); }
 .action-btn { margin-top: 15px; }
 .next-btn { background-color: #0284c7; }
 .next-btn:hover { background-color: #0369a1; }
+
+.input-block {
+    margin-top: 15px;
+    background: #fdfdfd;
+    padding: 15px;
+    border: 1px dashed var(--primary);
+    border-radius: 8px;
+}
+
+.start1-btn {
+    background-color: var(--start1-color);
+    margin-top: 5px;
+}
+.start1-btn:hover {
+    background-color: var(--start1-hover);
+}
 
 #timer-box {
     text-align: center;

@@ -139,3 +139,22 @@ button:hover { background-color: var(--primary-hover); }
     padding: 20px;
 }
 .success-icon { font-size: 48px; margin-bottom: 10px; }
+.back-link-btn {
+    background: none !important;
+    color: var(--text-muted) !important;
+    border: none !important;
+    font-size: 14px !important;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-top: 15px;
+    font-weight: normal !important;
+    text-align: center;
+    width: auto !important;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.back-link-btn:hover {
+    color: var(--primary) !important;
+}

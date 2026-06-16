@@ -44,6 +44,7 @@
                     <div class="test-item">ტესტი 20</div>
                     
                     <input type="text" id="user-text-1" placeholder="ჩაწერეთ რაიმე...">
+                    <input type="text" id="user-text-1-2" placeholder="ჩაწერეთ რაიმე2...">
                     <p id="error-1" class="error"></p>
                     
                     <button class="action-btn" onclick="validateAndStart(1, 5)">დაწყება</button>
@@ -56,9 +57,11 @@
                         <div class="test-item">ტესტი 50</div>
                         
                         <input type="text" id="user-text-2" placeholder="ჩაწერეთ რაიმე...">
+                        <input type="text" id="user-text-2-2" placeholder="ჩაწერეთ რაიმე2...">
                         <p id="error-2" class="error"></p>
                         
                         <button class="action-btn" onclick="validateAndStart(2, 5)">დაწყება</button>
+                        <button class="back-link-btn" onclick="goBackStage()">← უკან დაბრუნება</button>
                     </div>
                 </div>
 
@@ -68,9 +71,11 @@
                     <div class="test-item">ტესტი 100</div>
                     
                     <input type="text" id="user-text-3" placeholder="ჩაწერეთ რაიმე...">
+                    <input type="text" id="user-text-3-2" placeholder="ჩაწერეთ რაიმე2...">
                     <p id="error-3" class="error"></p>
                     
                     <button class="action-btn" onclick="validateAndStart(3, 5)">დაწყება</button>
+                    <button class="back-link-btn" onclick="goBackStage()">← უკან დაბრუნება</button>
                 </div>
 
                 <div id="timer-box" class="hidden">
@@ -81,6 +86,7 @@
                 <div id="final-message" class="hidden">
                     <div class="success-icon">✓</div>
                     <h3>ყველა დავალება შესრულებულია!</h3>
+                    <button class="back-link-btn" onclick="goBackStage()">← ეტაპებზე დაბრუნება</button>
                 </div>
             </div>
         </div>

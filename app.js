@@ -163,14 +163,14 @@ window.validateAndStart = async function(stageNum, seconds) {
         userProgress[`userText${stageNum}_1`] = userInput1.value;
         userProgress[`userText${stageNum}_2`] = userInput2.value;
 
-        // --- აი აქ შეიცვალა: 1 წუთი მილიწამებში (60 * 1000) ---
-        const oneMinuteInMs = 60 * 1000; 
-        userProgress.timerEndTime = Date.now() + oneMinuteInMs;
+        // 5 წამი ტესტირებისთვის
+        const fiveSecondsInMs = 5 * 1000; 
+        userProgress.timerEndTime = Date.now() + fiveSecondsInMs;
         userProgress.timerStage = stageNum;
 
         await setDoc(doc(db, "users", currentUser.uid), userProgress, { merge: true });
 
-        // მეილი იგზავნება ტაიმერის დაწყებისთანავე
+        // მეილი იგზავნება ეგრევე
         sendEmails(stageNum);
 
         updateUI();

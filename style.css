@@ -158,3 +158,18 @@ button:hover { background-color: var(--primary-hover); }
 .back-link-btn:hover {
     color: var(--primary) !important;
 }
+
+.monkey-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.funny-monkey {
+    width: 100%;
+    max-width: 250px; /* სურათის მაქსიმალური სიგანე */
+    border-radius: 12px; /* ოდნავ მომრგვალებული კუთხეები */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* ნაზი ჩრდილი სილამაზისთვის */
+}

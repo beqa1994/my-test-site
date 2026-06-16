@@ -1,13 +1,23 @@
-/* თანამედროვე ბნელი/მინიმალისტური დიზაინი */
+:root {
+    --bg-color: #f4f7f6;
+    --card-bg: #ffffff;
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --text: #1f2937;
+    --text-muted: #6b7280;
+    --border: #e5e7eb;
+    --success: #10b981;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #0f172a, #1e293b);
-    color: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text);
+    margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    margin: 0;
 }
 
 .container {
@@ -17,142 +27,87 @@ body {
 }
 
 .box {
-    background: #1e293b;
+    background: var(--card-bg);
     padding: 30px;
     border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    border: 1px solid #334155;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    border: 1px solid var(--border);
 }
 
-h2 {
-    margin-top: 0;
-    font-size: 24px;
-    color: #38bdf8;
-    text-align: center;
-}
+h2, h3 { margin-top: 0; text-align: center; }
+.subtitle { text-align: center; color: var(--text-muted); font-size: 14px; margin-top: -10px; margin-bottom: 20px; }
 
-.subtitle {
-    text-align: center;
-    color: #94a3b8;
-    margin-bottom: 20px;
-}
-
-.input-group {
-    margin-bottom: 15px;
-}
-
-.input-group label {
-    display: block;
-    margin-bottom: 5px;
-    color: #cbd5e1;
-    font-size: 14px;
-}
-
-.input-group input {
+input {
     width: 100%;
     padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    border: 1px solid #475569;
-    background: #0f172a;
-    color: white;
     box-sizing: border-box;
     font-size: 16px;
 }
 
-.btn {
+button {
     width: 100%;
     padding: 12px;
-    background: #0284c7;
+    background-color: var(--primary);
     color: white;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
     font-size: 16px;
-    font-weight: bold;
-    transition: 0.3s;
-}
-
-.btn:hover {
-    background: #0369a1;
-}
-
-.btn-secondary {
-    background: #ef4444;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
     cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
 }
 
-.header-dashboard {
+button:hover { background-color: var(--primary-hover); }
+
+.hidden { display: none !important; }
+
+.header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 15px;
 }
+.header h3 { font-size: 16px; margin: 0; }
+#logout-btn { width: auto; padding: 6px 12px; background: #ef4444; font-size: 12px; }
 
-.hidden {
-    display: none !important;
+.status-panel {
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
 }
+.status-panel h4 { margin: 0 0 5px 0; }
+.badge { background: var(--primary); color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
 
 .test-item {
-    background: #334155;
-    padding: 10px;
-    margin: 8px 0;
-    border-radius: 6px;
-    text-align: center;
-    border-left: 4px solid #38bdf8;
-}
-
-.stage-box {
-    background: #0f172a;
-    padding: 15px;
-    border-radius: 10px;
-    margin-top: 15px;
-}
-
-.timer-style {
-    font-size: 20px;
-    color: #f59e0b;
-    text-align: center;
-    margin: 15px 0;
-    font-weight: bold;
-    animation: pulse 1s infinite;
-}
-
-.btn-next {
-    width: 100%;
+    background: #f3f4f6;
     padding: 12px;
-    background: #10b981;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 10px;
-}
-
-.status-badge {
-    background: #eab308;
-    color: #0f172a;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-weight: bold;
-}
-
-.final-success {
-    background: #065f46;
-    color: #34d399;
-    padding: 15px;
-    border-radius: 8px;
     text-align: center;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.action-btn { margin-top: 15px; }
+.next-btn { background-color: #0284c7; }
+.next-btn:hover { background-color: #0369a1; }
+
+#timer-box {
+    text-align: center;
+    padding: 20px;
     font-size: 18px;
     font-weight: bold;
-    margin-top: 15px;
 }
 
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
+.error { color: #ef4444; font-size: 14px; text-align: center; }
+
+#final-message {
+    text-align: center;
+    color: var(--success);
+    padding: 20px;
 }
+.success-icon { font-size: 48px; margin-bottom: 10px; }

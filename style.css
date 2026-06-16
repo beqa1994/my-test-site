@@ -1,0 +1,158 @@
+/* თანამედროვე ბნელი/მინიმალისტური დიზაინი */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: #f8fafc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.container {
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+}
+
+.box {
+    background: #1e293b;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    border: 1px solid #334155;
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 24px;
+    color: #38bdf8;
+    text-align: center;
+}
+
+.subtitle {
+    text-align: center;
+    color: #94a3b8;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #475569;
+    background: #0f172a;
+    color: white;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+.btn {
+    width: 100%;
+    padding: 12px;
+    background: #0284c7;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    background: #0369a1;
+}
+
+.btn-secondary {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.header-dashboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.test-item {
+    background: #334155;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 6px;
+    text-align: center;
+    border-left: 4px solid #38bdf8;
+}
+
+.stage-box {
+    background: #0f172a;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+.timer-style {
+    font-size: 20px;
+    color: #f59e0b;
+    text-align: center;
+    margin: 15px 0;
+    font-weight: bold;
+    animation: pulse 1s infinite;
+}
+
+.btn-next {
+    width: 100%;
+    padding: 12px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.status-badge {
+    background: #eab308;
+    color: #0f172a;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.final-success {
+    background: #065f46;
+    color: #34d399;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}

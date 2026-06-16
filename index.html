@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>სავარჯიშო პორტალი</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <div id="auth-zone" class="box">
+            <h2>ავტორიზაცია</h2>
+            <p class="subtitle">შედით თქვენს კაბინეტში</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <label>ელ-ფოსტა</label>
+                    <input type="email" id="email" placeholder="example@mail.com" required>
+                </div>
+                <div class="input-group">
+                    <label>პაროლი</label>
+                    <input type="password" id="password" placeholder="******" required>
+                </div>
+                <button type="submit" class="btn">შესვლა / რეგისტრაცია</button>
+            </form>
+        </div>
+
+        <div id="dashboard-zone" class="box hidden">
+            <div class="header-dashboard">
+                <h2>პირადი კაბინეტი</h2>
+                <button id="logout-btn" class="btn-secondary">გამოსვლა</button>
+            </div>
+            <p>მოგესალმებით: <strong id="user-email-display"></strong></p>
+            
+            <hr>
+
+            <div class="status-panel">
+                <p>სტატუსი: <span id="task-status" class="status-badge">მიმდინარეობს</span></p>
+            </div>
+
+            <div id="task-container">
+                
+                <div id="stage-1" class="stage-box">
+                    <h3>ტესტი 1</h3>
+                    <div class="test-item">ტესტი 70</div>
+                    <div class="test-item">ტესტი 20</div>
+                    <button id="start-1" class="btn btn-start">დაწყება</button>
+                </div>
+
+                <div id="timer-box" class="timer-style hidden">
+                    დარჩენილი დრო: <span id="countdown">5</span> წამი
+                </div>
+
+                <div id="stage-2" class="stage-box hidden">
+                    <button id="next-stage-2" class="btn-next">ტესტი 2</button>
+                    <div id="stage-2-content" class="hidden">
+                        <h3>ტესტი 2</h3>
+                        <div class="test-item">ტესტი 70</div>
+                        <div class="test-item">ტესტი 50</div>
+                        <button id="start-2" class="btn btn-start">დაწყება</button>
+                    </div>
+                </div>
+
+                <div id="stage-3" class="stage-box hidden">
+                    <button id="next-stage-3" class="btn-next">შემდეგი</button>
+                    <div id="stage-3-content" class="hidden">
+                        <h3>ტესტი 3</h3>
+                        <div class="test-item">ტესტი 70</div>
+                        <div class="test-item">ტესტი 100</div>
+                        <button id="start-3" class="btn btn-start">დაწყება</button>
+                    </div>
+                </div>
+
+                <div id="final-message" class="final-success hidden">
+                    🎉 ყველა დავალება შესრულებულია!
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

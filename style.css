@@ -50,9 +50,9 @@ body {
 .main-layout {
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: stretch;
     justify-content: center;
-    gap: 30px;
+    gap: 25px;
     width: 100%;
     max-width: 1200px;
     padding: 0 20px;
@@ -61,7 +61,7 @@ body {
 
 .center-zone {
     width: 100%;
-    max-width: 450px;
+    max-width: 440px;
     flex-shrink: 0;
 }
 
@@ -170,10 +170,10 @@ button:active { transform: scale(0.98); }
     margin-right: auto;
 }
 
-/* მარცხენა ვიჯეტი (ფასი, სტატისტიკა, კონტაქტი) */
+/* მარცხენა ვიჯეტი */
 #crypto-widget {
     background: var(--card-bg);
-    padding: 20px; 
+    padding: 25px; 
     border-radius: 16px; 
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
     border: 1px solid var(--border);
@@ -182,34 +182,33 @@ button:active { transform: scale(0.98); }
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 220px; 
+    width: 250px; 
     box-sizing: border-box;
 }
 
 .crypto-ticker {
     color: var(--text-muted);
-    font-size: 14px; 
+    font-size: 15px; 
     font-weight: bold;
-    margin-bottom: 4px; 
+    margin-bottom: 6px; 
     font-family: monospace;
 }
 
 #ltc-price {
     color: #10b981;
-    font-size: 28px; 
+    font-size: 30px; 
     font-weight: 800; 
     font-family: monospace;
 }
 
-/* ახალი სტატისტიკის ბლოკის სტილები */
 .live-stats {
     width: 100%;
-    margin-top: 15px;
-    padding-top: 12px;
+    margin-top: 20px;
+    padding-top: 15px;
     border-top: 1px solid #e5e7eb;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .stat-item-row {
@@ -220,13 +219,13 @@ button:active { transform: scale(0.98); }
 }
 
 .stat-label {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-muted);
     font-weight: 500;
 }
 
 .stat-value {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: bold;
     color: var(--text);
     font-family: monospace;
@@ -237,47 +236,93 @@ button:active { transform: scale(0.98); }
     animation: pulseEffect 2s infinite;
 }
 
-.admin-contact {
+/* ქსელის სტატისტიკა */
+.network-stats {
+    width: 100%;
     margin-top: 15px;
-    padding-top: 12px;
+    padding: 12px;
+    background: rgba(241, 245, 249, 0.6);
+    border-radius: 10px;
+    border: 1px dashed #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-sizing: border-box;
+}
+
+.network-title {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+    text-align: center;
+}
+
+/* სარეკლამო ბანერი */
+.promo-banner {
+    width: 100%;
+    margin-top: 15px;
+    padding: 15px 10px;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(249, 115, 22, 0.1));
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-sizing: border-box;
+    animation: urgentPulse 2.5s infinite ease-in-out;
+}
+
+.promo-icon { font-size: 18px; }
+.promo-text {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #dc2626; 
+    text-align: center;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+}
+
+@keyframes urgentPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.15); }
+    50% { transform: scale(1.01); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.1); background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(249, 115, 22, 0.15)); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.15); }
+}
+
+.admin-contact {
+    margin-top: auto; 
+    padding-top: 15px;
     border-top: 1px solid #e5e7eb;
     width: 100%;
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
 }
 
-.contact-label {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-weight: 500;
-}
+.contact-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+.contact-email { font-size: 13px; color: var(--primary); text-decoration: none; font-weight: bold; }
+.contact-email:hover { color: var(--primary-hover); text-decoration: underline; }
 
-.contact-email {
-    font-size: 13px;
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: bold;
-    transition: color 0.2s;
-}
-.contact-email:hover {
-    color: var(--primary-hover);
-    text-decoration: underline;
-}
-
-/* მარჯვენა ვიჯეტი (ტრანზაქციები) */
+/* მარჯვენა ვიჯეტი (ტრანზაქციები) - სრულად ადაპტირებული */
 #tx-widget {
     background: var(--card-bg);
-    padding: 20px;
+    padding: 20px 14px;
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
     border: 1px solid var(--border);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    width: 320px;
+    width: 330px;
     flex-shrink: 0;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 .tx-title {
@@ -293,9 +338,12 @@ button:active { transform: scale(0.98); }
 #tx-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    max-height: 440px; 
-    overflow-y: auto; 
+    gap: 8px;
+    flex-grow: 1;
+    max-height: 490px; /* 295px-დან ავწიეთ 490px-მდე, რომ თეთრი სივრცე სრულად შეივსოს */
+    overflow-y: auto;  /* სქროლბარი გამოჩნდება მხოლოდ მაშინ, როცა 12-ზე მეტი ტრანზაქცია იქნება */
+    padding-right: 4px;
+    box-sizing: border-box;
 }
 
 .tx-item {
@@ -303,24 +351,40 @@ button:active { transform: scale(0.98); }
     justify-content: space-between;
     align-items: center;
     background: rgba(248, 250, 252, 0.8);
-    padding: 8px 12px;
+    padding: 10px 10px;
     border-radius: 8px;
-    font-size: 12px;
+    font-size: 12.5px;
     font-family: monospace;
     border-left: 4px solid #10b981; 
+    box-sizing: border-box;
+    width: 100%;
 }
-.tx-id { color: var(--text-muted); }
-.tx-amount { color: #10b981; font-weight: bold; }
+
+.tx-left {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.tx-id { 
+    color: var(--text-muted); 
+    font-weight: bold;
+}
+
+.tx-hash {
+    color: #4b5563;
+}
+
+.tx-amount { 
+    color: #10b981; 
+    font-weight: bold;
+    white-space: nowrap;
+}
+
 .tx-loading { font-size: 12px; text-align: center; color: var(--text-muted); padding: 10px 0; }
 
 @media (max-width: 1050px) {
-    .main-layout {
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-    }
-    .center-zone, #tx-widget, #crypto-widget {
-        width: 100%;
-        max-width: 450px;
-    }
+    .main-layout { flex-direction: column; align-items: center; gap: 20px; }
+    .center-zone, #tx-widget, #crypto-widget { width: 100%; max-width: 450px; }
+    #tx-list { max-height: 400px; }
 }

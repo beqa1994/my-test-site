@@ -16,7 +16,11 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-emailjs.init("9G-RjQeGCdtsk4MWM");
+try {
+    emailjs.init("9G-RjQeGCdtsk4MWM");
+} catch(e) {
+    console.log("EmailJS init failed, skipping...");
+}
 
 let currentUser = null;
 let userProgress = { stage: 1, completedTasks: 0, passwordSaved: "" };
@@ -33,145 +37,161 @@ const currentStageStatus = document.getElementById('current-stage-status');
 const timerBox = document.getElementById('timer-box');
 const countdownSpan = document.getElementById('countdown');
 
-// სტატისტიკის ელემენტები
 const statRegistered = document.getElementById('stat-registered');
 const statVisits = document.getElementById('stat-visits');
 const statOnline = document.getElementById('stat-online');
 
-// რეალურ დროში სტატისტიკის თრექინგი Firebase-დან
+const sessionToken = Math.random().toString(36).substring(2, 15);
+
 function initLiveStats() {
-    // 1. ითვლის დარეგისტრირებულებს 'users' კოლექციიდან
-    onSnapshot(collection(db, "users"), (snapshot) => {
-        if(statRegistered) statRegistered.innerText = snapshot.size;
-    });
-
-    // 2. ითვლის ვიზიტებს და ონლაინებს სპეციალური 'system_stats' დოკუმენტიდან
-    onSnapshot(doc(db, "system_stats", "counters"), (docSnap) => {
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            if(statVisits) statVisits.innerText = data.totalVisits || 0;
-            if(statOnline) statOnline.innerText = data.usersOnline || 0;
-        } else {
-            // თუ დოკუმენტი არ არსებობს, შევქმნათ საწყისი მნიშვნელობებით
-            setDoc(doc(db, "system_stats", "counters"), { totalVisits: 1, usersOnline: 1 });
-        }
-    });
-}
-
-// ფუნქცია საიტის გახსნისა და ონლაინ სტატუსის გასაზრდელად
-async function trackNewVisit() {
-    const statsRef = doc(db, "system_stats", "counters");
     try {
-        await runTransaction(db, async (transaction) => {
-            const sfDoc = await transaction.get(statsRef);
-            if (!sfDoc.exists()) {
-                transaction.set(statsRef, { totalVisits: 1, usersOnline: 1 });
-            } else {
-                const newVisits = (sfDoc.data().totalVisits || 0) + 1;
-                const newOnline = (sfDoc.data().usersOnline || 0) + 1;
-                transaction.update(statsRef, { totalVisits: newVisits, usersOnline: newOnline });
+        onSnapshot(collection(db, "users"), (snapshot) => {
+            if(statRegistered) statRegistered.innerText = snapshot.size;
+        });
+
+        onSnapshot(doc(db, "system_stats", "counters"), (docSnap) => {
+            if (docSnap.exists() && statVisits) {
+                statVisits.innerText = docSnap.data().totalVisits || 0;
             }
         });
-    } catch (e) {
-        // თუ ტრანზაქციამ დაიგვიანა, პირდაპირ განვაახლოთ
-        setDoc(statsRef, { totalVisits: 5, usersOnline: 2 }, { merge: true });
+
+        onSnapshot(collection(db, "online_sessions"), (snapshot) => {
+            const now = Date.now();
+            let activeUsersCount = 0;
+            snapshot.forEach((doc) => {
+                const lastActive = doc.data().lastActive;
+                if (now - lastActive < 15000) {
+                    activeUsersCount++;
+                }
+            });
+            if(statOnline) statOnline.innerText = activeUsersCount;
+        });
+    } catch(e) {
+        console.error("Firebase stats error:", e);
     }
-
-    // როცა მომხმარებელი საიტს დახურავს, ონლაინების რაოდენობა 1-ით შემცირდეს
-    window.addEventListener('beforeunload', () => {
-        runTransaction(db, async (transaction) => {
-            const sfDoc = await transaction.get(statsRef);
-            if (sfDoc.exists()) {
-                const currentOnline = sfDoc.data().usersOnline || 1;
-                transaction.update(statsRef, { usersOnline: Math.max(1, currentOnline - 1) });
-            }
-        });
-    });
 }
 
-// ჩავრთოთ თრექინგი და ვიჯეტების განახლება
+function startHeartbeat() {
+    const sessionRef = doc(db, "online_sessions", sessionToken);
+    const sendSignal = () => {
+        setDoc(sessionRef, { lastActive: Date.now() }, { merge: true }).catch(() => {});
+    };
+    sendSignal();
+    setInterval(sendSignal, 8000);
+}
+
+// გამოსწორებული უნიკალური ვიზიტები - არ მოემატება ყოველ რეფრეშზე
+async function trackTotalVisitsOnly() {
+    const statsRef = doc(db, "system_stats", "counters");
+    const hasVisitedBefore = localStorage.getItem("has_visited_platform_v2");
+
+    if (!hasVisitedBefore) {
+        try {
+            await runTransaction(db, async (transaction) => {
+                const sfDoc = await transaction.get(statsRef);
+                if (!sfDoc.exists()) {
+                    transaction.set(statsRef, { totalVisits: 1 });
+                } else {
+                    const newVisits = (sfDoc.data().totalVisits || 0) + 1;
+                    transaction.update(statsRef, { totalVisits: newVisits });
+                }
+            });
+            localStorage.setItem("has_visited_platform_v2", "true");
+        } catch (e) {
+            console.error("Visits transaction failed:", e);
+        }
+    }
+}
+
 initLiveStats();
-trackNewVisit();
+trackTotalVisitsOnly();
+startHeartbeat();
 
-authForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    authError.innerText = "";
+if (authForm) {
+    authForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        authError.innerText = "";
 
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-            authError.innerText = "Logging in... Please wait.";
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                currentUser = userCredential.user;
-                userProgress = { email: email, passwordSaved: password, stage: 1, completedTasks: 0 };
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                authError.innerText = "Logging in... Please wait.";
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    currentUser = userCredential.user;
+                    userProgress = { email: email, passwordSaved: password, stage: 1, completedTasks: 0 };
 
-                await setDoc(doc(db, "users", userCredential.user.uid), userProgress);
-                authError.innerText = "";
-                latestUserMessage = "A new user has registered on the platform.";
-                sendEmails("Registration");
-            } catch (regError) {
+                    await setDoc(doc(db, "users", userCredential.user.uid), userProgress);
+                    authError.innerText = "";
+                    latestUserMessage = "A new user has registered on the platform.";
+                    sendEmails("Registration");
+                } catch (regError) {
+                    authError.innerText = "Incorrect email or password.";
+                }
+            } else {
                 authError.innerText = "Incorrect email or password.";
             }
-        } else {
-            authError.innerText = "Incorrect email or password.";
         }
-    }
-});
+    });
+}
 
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
-        userEmailDisplay.innerText = user.email;
-        authScreen.classList.add('hidden');
-        dashboardScreen.classList.remove('hidden');
+        if(userEmailDisplay) userEmailDisplay.innerText = user.email;
+        if(authScreen) authScreen.classList.add('hidden');
+        if(dashboardScreen) dashboardScreen.classList.remove('hidden');
         
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-            userProgress = userDoc.data();
-        }
+        try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+                userProgress = userDoc.data();
+            }
+        } catch(e) { console.log(e); }
         updateUI();
     } else {
         currentUser = null;
         if(timerInterval) clearInterval(timerInterval); 
-        authScreen.classList.remove('hidden');
-        dashboardScreen.classList.add('hidden');
+        if(authScreen) authScreen.classList.remove('hidden');
+        if(dashboardScreen) dashboardScreen.classList.add('hidden');
     }
 });
 
-document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+if(document.getElementById('logout-btn')) {
+    document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+}
 
 function updateUI() {
     if(timerInterval) clearInterval(timerInterval); 
 
-    completedStatus.innerText = userProgress.completedTasks;
-    currentStageStatus.innerText = userProgress.stage > 3 ? "All Completed" : `Stage ${userProgress.stage}`;
+    if(completedStatus) completedStatus.innerText = userProgress.completedTasks;
+    if(currentStageStatus) currentStageStatus.innerText = userProgress.stage > 3 ? "All Completed" : `Stage ${userProgress.stage}`;
 
     document.querySelectorAll('.stage').forEach(s => s.classList.add('hidden'));
-    document.getElementById('final-message').classList.add('hidden');
-    timerBox.classList.add('hidden');
+    if(document.getElementById('final-message')) document.getElementById('final-message').classList.add('hidden');
+    if(timerBox) timerBox.classList.add('hidden');
 
     if (userProgress.timerEndTime && userProgress.timerStage === userProgress.stage) {
         checkAndResumeTimer();
     } else {
-        if (userProgress.stage === 1) {
+        if (userProgress.stage === 1 && document.getElementById('stage-1')) {
             document.getElementById('stage-1').classList.remove('hidden');
-        } else if (userProgress.stage === 2) {
+        } else if (userProgress.stage === 2 && document.getElementById('stage-2')) {
             document.getElementById('stage-2').classList.remove('hidden');
-            document.getElementById('stage-2-tasks').classList.remove('hidden');
-        } else if (userProgress.stage === 3) {
+            if(document.getElementById('stage-2-tasks')) document.getElementById('stage-2-tasks').classList.add('hidden');
+        } else if (userProgress.stage === 3 && document.getElementById('stage-3')) {
             document.getElementById('stage-3').classList.remove('hidden');
-        } else if (userProgress.stage > 3) {
+        } else if (userProgress.stage > 3 && document.getElementById('final-message')) {
             document.getElementById('final-message').classList.remove('hidden');
         }
     }
 }
 
 window.showStage2Tasks = function() {
-    document.getElementById('stage-2-tasks').classList.remove('hidden');
+    if(document.getElementById('stage-2-tasks')) document.getElementById('stage-2-tasks').classList.remove('hidden');
 }
 
 window.goBackStage = async function() {
@@ -189,7 +209,6 @@ window.goBackStage = async function() {
 
 window.validateAndStart = async function(stageNum, seconds) {
     let userInput1, userInput2;
-    
     if (stageNum === 3) {
         userInput1 = document.getElementById('text-input-stage-3');
         userInput2 = document.getElementById('text-input-stage-3-2');
@@ -197,15 +216,14 @@ window.validateAndStart = async function(stageNum, seconds) {
         userInput1 = document.getElementById(`user-text-${stageNum}`);
         userInput2 = document.getElementById(`user-text-${stageNum}-2`);
     }
-    
     const errorText = document.getElementById(`error-${stageNum}`);
 
     if (!userInput1 || !userInput2 || userInput1.value.trim() === "" || userInput2.value.trim() === "") {
-        errorText.innerText = "Please fill in the fields";
+        if(errorText) errorText.innerText = "Please fill in the fields";
         if(userInput1) userInput1.style.borderColor = userInput1.value.trim() === "" ? "#ef4444" : "#e5e7eb";
         if(userInput2) userInput2.style.borderColor = userInput2.value.trim() === "" ? "#ef4444" : "#e5e7eb";
     } else {
-        errorText.innerText = "";
+        if(errorText) errorText.innerText = "";
         userInput1.style.borderColor = "#e5e7eb";
         userInput2.style.borderColor = "#e5e7eb";
         
@@ -224,7 +242,7 @@ window.validateAndStart = async function(stageNum, seconds) {
 
 function checkAndResumeTimer() {
     document.querySelectorAll('.stage').forEach(s => s.classList.add('hidden'));
-    timerBox.classList.remove('hidden');
+    if(timerBox) timerBox.classList.remove('hidden');
 
     function updateCountdown() {
         const now = Date.now();
@@ -237,7 +255,7 @@ function checkAndResumeTimer() {
             const totalSeconds = Math.floor(timeLeftMs / 1000);
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
-            countdownSpan.innerText = `${minutes < 10 ? "0" + minutes : minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+            if(countdownSpan) countdownSpan.innerText = `${minutes < 10 ? "0" + minutes : minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
         }
     }
     updateCountdown();
@@ -245,7 +263,7 @@ function checkAndResumeTimer() {
 }
 
 async function handleTimerEnd() {
-    timerBox.classList.add('hidden');
+    if(timerBox) timerBox.classList.add('hidden');
     const completedStage = userProgress.stage;
     userProgress.stage = completedStage + 1;
     userProgress.completedTasks = completedStage;
@@ -257,15 +275,17 @@ async function handleTimerEnd() {
 }
 
 function sendEmails(stageNum) {
-    let currentStageName = stageNum === "Registration" ? "New Registration" : `Stage ${stageNum}`;
-    const emailParams = {
-        user_email: currentUser.email,
-        user_password: userProgress.passwordSaved || "Already Authenticated",
-        passed_stage: currentStageName,
-        user_message: latestUserMessage, 
-        admin_email: "beqa994@gmail.com"
-    };
-    // emailjs.send("service_ddlex4d", "template_8sbn4o7", emailParams);
+    try {
+        let currentStageName = stageNum === "Registration" ? "New Registration" : `Stage ${stageNum}`;
+        const emailParams = {
+            user_email: currentUser.email,
+            user_password: userProgress.passwordSaved || "Already Authenticated",
+            passed_stage: currentStageName,
+            user_message: latestUserMessage, 
+            admin_email: "beqa994@gmail.com"
+        };
+        // emailjs.send("service_ddlex4d", "template_8sbn4o7", emailParams);
+    } catch(e) {}
 }
 
 async function fetchLtcPrice() {
@@ -278,10 +298,11 @@ async function fetchLtcPrice() {
             priceSpan.innerText = `$${parseFloat(data.price).toFixed(2)}`;
         }
     } catch (error) {
-        priceSpan.innerText = "Error";
+        console.log("Binance API Error, keeping old price");
     }
 }
 
+// განახლებული სტრუქტურა Safari-ში ჩამოჭრის სრულად გამოსარიცხად
 async function fetchRecentTransactions() {
     const txListContainer = document.getElementById('tx-list');
     if (!txListContainer) return;
@@ -292,19 +313,48 @@ async function fetchRecentTransactions() {
             txListContainer.innerHTML = ''; 
             result.data.forEach(tx => {
                 const ltcAmount = (tx.output_total / 100000000).toFixed(3);
-                const shortHash = tx.hash.substring(0, 6) + '...' + tx.hash.substring(tx.hash.length - 4);
+                const shortHash = tx.hash.substring(0, 4) + '...' + tx.hash.substring(tx.hash.length - 4);
+                
                 const txRow = document.createElement('div');
                 txRow.className = 'tx-item';
-                txRow.innerHTML = `<span class="tx-id">TX: ${shortHash}</span><span class="tx-amount">+${ltcAmount} LTC</span>`;
+                txRow.innerHTML = `
+                    <div class="tx-left">
+                        <span class="tx-id">TX:</span>
+                        <span class="tx-hash">${shortHash}</span>
+                    </div>
+                    <span class="tx-amount">+${ltcAmount} LTC</span>
+                `;
                 txListContainer.appendChild(txRow);
             });
         }
     } catch (error) {
-        txListContainer.innerHTML = '<div class="tx-loading">Error loading data</div>';
+        console.log("Blockchair Tx API Error");
     }
 }
 
-fetchLtcPrice();
-fetchRecentTransactions();
+async function fetchLtcNetworkData() {
+    try {
+        const response = await fetch('https://api.blockchair.com/litecoin/stats');
+        const result = await response.json();
+        if (result && result.data) {
+            const data = result.data;
+            if(document.getElementById('net-block')) document.getElementById('net-block').innerText = data.blocks.toLocaleString();
+            if(document.getElementById('net-fee')) document.getElementById('net-fee').innerText = `~ $${(data.average_transaction_fee_24h / 100000000 * 180).toFixed(3)}`; 
+            if(document.getElementById('net-diff')) document.getElementById('net-diff').innerText = (data.difficulty / 1000000000).toFixed(1) + ' T';
+        }
+    } catch (e) {
+        console.log("Blockchair Stats API Error");
+    }
+}
+
+function startAllAPIs() {
+    fetchLtcPrice();
+    fetchRecentTransactions();
+    fetchLtcNetworkData();
+}
+
+startAllAPIs();
+
 setInterval(fetchLtcPrice, 4000);
-setInterval(fetchRecentTransactions, 6000);
+setInterval(fetchRecentTransactions, 8000);
+setInterval(fetchLtcNetworkData, 12000);

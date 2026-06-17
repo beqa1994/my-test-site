@@ -12,16 +12,25 @@
     <div class="container">
         <h1 class="main-title">სათაური</h1>
 
-        <div id="auth-screen" class="box">
-            <h2>ავტორიზაცია</h2>
-            <p class="subtitle">შედით თქვენს კაბინეტში</p>
-            <form id="auth-form">
-                <input type="email" id="email" placeholder="ელ-ფოსტა" required>
-                <input type="password" id="password" placeholder="პაროლი" required>
-                <button type="submit" id="auth-btn">შესვლა / რეგისტრაცია</button>
-            </form>
-            <p id="auth-error" class="error"></p>
-        </div>
+        <div class="auth-wrapper">
+            
+            <div id="crypto-widget">
+                <span class="crypto-ticker">LTC / USDT</span>
+                <span id="ltc-price">იტვირთება...</span>
+            </div>
+
+            <div id="auth-screen" class="box">
+                <h2>ავტორიზაცია</h2>
+                <p class="subtitle">შედით თქვენს კაბინეტში</p>
+                <form id="auth-form">
+                    <input type="email" id="email" placeholder="ელ-ფოსტა" required>
+                    <input type="password" id="password" placeholder="პაროლი" required>
+                    <button type="submit" id="auth-btn">შესვლა / რეგისტრაცია</button>
+                </form>
+                <p id="auth-error" class="error"></p>
+            </div>
+            
+        </div> 
 
         <div id="dashboard-screen" class="box hidden">
             <div class="header">
@@ -86,13 +95,12 @@
                 <div id="final-message" class="hidden">
                     <div class="success-icon">✓</div>
                     <h3>ყველა დავალება შესრულებულია!</h3>
-                    
-                    <div class="monkey-container">
-                        <img src="./monkey.gif" alt="მაიმუნი" class="funny-monkey">
-                    </div>
-
                     <button class="back-link-btn" onclick="goBackStage()">← ეტაპებზე დაბრუნება</button>
                 </div>
-            </div> </div> </div> <script type="module" src="./app.js"></script>
+            </div> 
+        </div> 
+    </div> 
+
+    <script type="module" src="./app.js"></script>
 </body>
 </html>

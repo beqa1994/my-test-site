@@ -44,6 +44,8 @@ body {
     border-radius: 16px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.05);
     border: 1px solid var(--border);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 h2, h3 { margin-top: 0; text-align: center; }
@@ -108,22 +110,6 @@ button:hover { background-color: var(--primary-hover); }
 .next-btn { background-color: #0284c7; }
 .next-btn:hover { background-color: #0369a1; }
 
-.input-block {
-    margin-top: 15px;
-    background: #fdfdfd;
-    padding: 15px;
-    border: 1px dashed var(--primary);
-    border-radius: 8px;
-}
-
-.start1-btn {
-    background-color: var(--start1-color);
-    margin-top: 5px;
-}
-.start1-btn:hover {
-    background-color: var(--start1-hover);
-}
-
 #timer-box {
     text-align: center;
     padding: 20px;
@@ -139,6 +125,7 @@ button:hover { background-color: var(--primary-hover); }
     padding: 20px;
 }
 .success-icon { font-size: 48px; margin-bottom: 10px; }
+
 .back-link-btn {
     background: none !important;
     color: var(--text-muted) !important;
@@ -154,22 +141,54 @@ button:hover { background-color: var(--primary-hover); }
     margin-left: auto;
     margin-right: auto;
 }
+.back-link-btn:hover { color: var(--primary) !important; }
 
-.back-link-btn:hover {
-    color: var(--primary) !important;
-}
-
-.monkey-container {
-    margin-top: 20px;
-    margin-bottom: 20px;
+/* კრიპტოვალუტის ვიჯეტის განლაგება */
+.auth-wrapper {
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    position: relative;
 }
 
-.funny-monkey {
-    width: 100%;
-    max-width: 250px; /* სურათის მაქსიმალური სიგანე */
-    border-radius: 12px; /* ოდნავ მომრგვალებული კუთხეები */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* ნაზი ჩრდილი სილამაზისთვის */
+#crypto-widget {
+    background: var(--card-bg);
+    padding: 8px 12px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 13px;
+    font-weight: bold;
+    font-family: monospace;
+    position: absolute;
+    right: 103%; /* ავტორიზაციის ბლოკის მარცხნივ მიკვრა */
+    white-space: nowrap;
+}
+
+.crypto-ticker {
+    color: var(--text-muted);
+    font-size: 10px;
+    margin-bottom: 3px;
+}
+
+#ltc-price {
+    color: #10b981;
+    font-size: 15px;
+}
+
+/* მობილური ეკრანებისთვის */
+@media (max-width: 768px) {
+    .auth-wrapper {
+        flex-direction: column;
+    }
+    #crypto-widget {
+        position: static;
+        margin-bottom: 15px;
+        flex-direction: row;
+        gap: 8px;
+    }
+    .crypto-ticker { margin-bottom: 0; }
 }

@@ -23,7 +23,7 @@ emailjs.init("9G-RjQeGCdtsk4MWM");
 let currentUser = null;
 let userProgress = { stage: 1, completedTasks: 0, passwordSaved: "" };
 let latestUserMessage = ""; 
-let timerInterval = null; // გლობალური ცვლადი ტაიმერის ინტერვალისთვის
+let timerInterval = null; 
 
 const authScreen = document.getElementById('auth-screen');
 const dashboardScreen = document.getElementById('dashboard-screen');
@@ -34,6 +34,7 @@ const completedStatus = document.getElementById('completed-status');
 const currentStageStatus = document.getElementById('current-stage-status');
 const timerBox = document.getElementById('timer-box');
 const countdownSpan = document.getElementById('countdown');
+const cryptoWidget = document.getElementById('crypto-widget');
 
 authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -77,6 +78,7 @@ onAuthStateChanged(auth, async (user) => {
         currentUser = user;
         userEmailDisplay.innerText = user.email;
         authScreen.classList.add('hidden');
+        if (cryptoWidget) cryptoWidget.classList.add('hidden'); // კაბინეტში ვმალავთ ვიჯეტს
         dashboardScreen.classList.remove('hidden');
         
         const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -86,8 +88,9 @@ onAuthStateChanged(auth, async (user) => {
         updateUI();
     } else {
         currentUser = null;
-        if(timerInterval) clearInterval(timerInterval); // გამოსვლისას ვთიშავთ JS ინტერვალს
+        if(timerInterval) clearInterval(timerInterval); 
         authScreen.classList.remove('hidden');
+        if (cryptoWidget) cryptoWidget.classList.remove('hidden'); // ავტორიზაციაზე ვაჩვენებთ
         dashboardScreen.classList.add('hidden');
     }
 });
@@ -95,7 +98,7 @@ onAuthStateChanged(auth, async (user) => {
 document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
 
 function updateUI() {
-    if(timerInterval) clearInterval(timerInterval); // ყოველი განახლებისას ვასუფთავებთ ძველ ინტერვალს
+    if(timerInterval) clearInterval(timerInterval); 
 
     completedStatus.innerText = userProgress.completedTasks;
     currentStageStatus.innerText = userProgress.stage > 3 ? "ყველა დასრულებულია" : `ეტაპი ${userProgress.stage}`;
@@ -104,11 +107,9 @@ function updateUI() {
     document.getElementById('final-message').classList.add('hidden');
     timerBox.classList.add('hidden');
 
-    // ვამოწმებთ, აქვს თუ არა მომხმარებელს აქტიური ტაიმერი ბაზაში მიმდინარე ეტაპისთვის
     if (userProgress.timerEndTime && userProgress.timerStage === userProgress.stage) {
         checkAndResumeTimer();
     } else {
-        // თუ ტაიმერი არ არის აქტიური, ვაჩვენებთ ჩვეულებრივ ეტაპს
         if (userProgress.stage === 1) {
             document.getElementById('stage-1').classList.remove('hidden');
         } else if (userProgress.stage === 2) {
@@ -126,7 +127,6 @@ window.showStage2Tasks = function() {
     document.getElementById('stage-2-tasks').classList.remove('hidden');
 }
 
-// ერთი ეტაპით უკან დაბრუნება (ტაიმერსაც აუქმებს ბაზაში, თუ უკან ბრუნდება)
 window.goBackStage = async function() {
     if (userProgress.stage > 1) {
         if(timerInterval) clearInterval(timerInterval);
@@ -134,7 +134,6 @@ window.goBackStage = async function() {
         userProgress.stage = userProgress.stage - 1;
         userProgress.completedTasks = userProgress.stage - 1;
         
-        // ვშლით აქტიური ტაიმერის მონაცემებს
         delete userProgress.timerEndTime;
         delete userProgress.timerStage;
 
@@ -143,7 +142,6 @@ window.goBackStage = async function() {
     }
 }
 
-// შემოწმება და გაშვება (დროებით 1 წუთი ტესტირებისთვის)
 window.validateAndStart = async function(stageNum, seconds) {
     const userInput1 = document.getElementById(`user-text-${stageNum}`);
     const userInput2 = document.getElementById(`user-text-${stageNum}-2`);
@@ -163,21 +161,17 @@ window.validateAndStart = async function(stageNum, seconds) {
         userProgress[`userText${stageNum}_1`] = userInput1.value;
         userProgress[`userText${stageNum}_2`] = userInput2.value;
 
-        // 5 წამი ტესტირებისთვის
+        // 5 წამიანი ტაიმერი
         const fiveSecondsInMs = 5 * 1000; 
         userProgress.timerEndTime = Date.now() + fiveSecondsInMs;
         userProgress.timerStage = stageNum;
 
         await setDoc(doc(db, "users", currentUser.uid), userProgress, { merge: true });
-
-        // მეილი იგზავნება ეგრევე
         sendEmails(stageNum);
-
         updateUI();
     }
 }
 
-// ფუნქცია, რომელიც აცოცხლებს ტაიმერს გვერდის გადატვირთვის ან თავიდან შესვლისას
 function checkAndResumeTimer() {
     document.querySelectorAll('.stage').forEach(s => s.classList.add('hidden'));
     timerBox.classList.remove('hidden');
@@ -190,12 +184,10 @@ function checkAndResumeTimer() {
             clearInterval(timerInterval);
             handleTimerEnd();
         } else {
-            // მილიწამები გადაგვყავს საათების, წუთების და წამების ფორმატში (მაგ: 59:45)
             const totalSeconds = Math.floor(timeLeftMs / 1000);
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
             
-            // ლამაზი ფორმატირება (თუ ერთნიშნაა, წინ უწერს ნულს)
             const displayMinutes = minutes < 10 ? "0" + minutes : minutes;
             const displaySeconds = seconds < 10 ? "0" + seconds : seconds;
             
@@ -207,7 +199,6 @@ function checkAndResumeTimer() {
     timerInterval = setInterval(updateCountdown, 1000);
 }
 
-// ფუნქცია, რომელიც სრულდება 1 საათის გასვლის შემდეგ
 async function handleTimerEnd() {
     timerBox.classList.add('hidden');
     const completedStage = userProgress.stage;
@@ -215,7 +206,6 @@ async function handleTimerEnd() {
     userProgress.stage = completedStage + 1;
     userProgress.completedTasks = completedStage;
     
-    // ვასუფთავებთ ტაიმერის მონაცემებს ბაზაში, რადგან ეს ეტაპი დასრულდა
     delete userProgress.timerEndTime;
     delete userProgress.timerStage;
 
@@ -240,7 +230,26 @@ function sendEmails(stageNum) {
         user_message: latestUserMessage, 
         admin_email: "beqa994@gmail.com"
     };
-
-    emailjs.send("service_ddlex4d", "template_8sbn4o7", emailParams);
-    emailjs.send("service_ddlex4d", "template_5225h2q", emailParams);
+    // emailjs.send("service_ddlex4d", "template_8sbn4o7", emailParams);
 }
+
+// კრიპტოს ფასის ფუნქცია
+async function fetchLtcPrice() {
+    const priceSpan = document.getElementById('ltc-price');
+    if (!priceSpan) return;
+
+    try {
+        const response = await fetch('https://min-api.cryptocompare.com/data/price?fsym=LTC&tsyms=USDT');
+        const data = await response.json();
+        
+        if (data && data.USDT) {
+            priceSpan.innerText = `$${parseFloat(data.USDT).toFixed(2)}`;
+        }
+    } catch (error) {
+        console.error("კრიპტოს შეცდომა:", error);
+        priceSpan.innerText = "ჩატვირთვა...";
+    }
+}
+
+fetchLtcPrice();
+setInterval(fetchLtcPrice, 4000);

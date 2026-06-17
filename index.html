@@ -1,104 +1,131 @@
 <!DOCTYPE html>
-<html lang="ka">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ტესტირების პლატფორმა</title>
+    <title>Testing Platform</title>
     <link rel="stylesheet" href="style.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
 
-    <div class="container">
-        <h1 class="main-title">სათაური</h1>
+    <h1 class="main-title">Title</h1>
 
-        <div class="auth-wrapper">
+    <div class="main-layout">
+        
+        <div id="crypto-widget">
+            <span class="crypto-ticker">LTC / USDT</span>
+            <span id="ltc-price">Loading...</span>
             
-            <div id="crypto-widget">
-                <span class="crypto-ticker">LTC / USDT</span>
-                <span id="ltc-price">იტვირთება...</span>
+            <div class="live-stats">
+                <div class="stat-item-row">
+                    <span class="stat-label">Total Registered:</span>
+                    <span id="stat-registered" class="stat-value">...</span>
+                </div>
+                <div class="stat-item-row">
+                    <span class="stat-label">Total Visits:</span>
+                    <span id="stat-visits" class="stat-value">...</span>
+                </div>
+                <div class="stat-item-row">
+                    <span class="stat-label">Users Online:</span>
+                    <span id="stat-online" class="stat-value online-pulse">...</span>
+                </div>
             </div>
 
+            <div class="admin-contact">
+                <span class="contact-label">Admin Support:</span>
+                <a href="mailto:LTC@gmail.com" class="contact-email">LTC@gmail.com</a>
+            </div>
+        </div>
+
+        <div class="center-zone">
+            
             <div id="auth-screen" class="box">
-                <h2>ავტორიზაცია</h2>
-                <p class="subtitle">შედით თქვენს კაბინეტში</p>
+                <h2>Login</h2>
+                <p class="subtitle">Access your account</p>
                 <form id="auth-form">
-                    <input type="email" id="email" placeholder="ელ-ფოსტა" required>
-                    <input type="password" id="password" placeholder="პაროლი" required>
-                    <button type="submit" id="auth-btn">შესვლა / რეგისტრაცია</button>
+                    <input type="email" id="email" placeholder="Email" required>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <button type="submit" id="auth-btn">Login / Register</button>
                 </form>
                 <p id="auth-error" class="error"></p>
             </div>
-            
-        </div> 
 
-        <div id="dashboard-screen" class="box hidden">
-            <div class="header">
-                <h3>მოგესალმებით, <span id="user-email-display"></span></h3>
-                <button id="logout-btn">გამოსვლა</button>
-            </div>
-            
-            <hr>
+            <div id="dashboard-screen" class="box hidden">
+                <div class="header">
+                    <h3>Welcome, <span id="user-email-display"></span></h3>
+                    <button id="logout-btn">Logout</button>
+                </div>
+                
+                <hr>
 
-            <div class="status-panel">
-                <h4>თქვენი სტატუსი:</h4>
-                <p>შესრულებული დავალებები: <span id="completed-status" class="badge">0</span></p>
-                <p>მიმდინარე ეტაპი: <span id="current-stage-status">არ არის დაწყებული</span></p>
-            </div>
-
-            <div id="task-zone">
-                <div id="stage-1" class="stage">
-                    <div class="test-item">ტესტი 1</div>
-                    <div class="test-item">ტესტ 70</div>
-                    <div class="test-item">ტესტი 20</div>
-                    
-                    <input type="text" id="user-text-1" placeholder="ჩაწერეთ რაიმე...">
-                    <input type="text" id="user-text-1-2" placeholder="ჩაწერეთ რაიმე2...">
-                    <p id="error-1" class="error"></p>
-                    
-                    <button class="action-btn" onclick="validateAndStart(1, 5)">დაწყება</button>
+                <div class="status-panel">
+                    <h4>Your Status:</h4>
+                    <p>Completed Tasks: <span id="completed-status" class="badge">0</span></p>
+                    <p>Current Stage: <span id="current-stage-status">Not Started</span></p>
                 </div>
 
-                <div id="stage-2" class="stage hidden">
-                    <button class="action-btn next-btn" onclick="showStage2Tasks()">ტესტი 2</button>
-                    <div id="stage-2-tasks" class="hidden">
-                        <div class="test-item">ტესტი 70</div>
-                        <div class="test-item">ტესტი 50</div>
+                <div id="task-zone">
+                    <div id="stage-1" class="stage">
+                        <div class="test-item">Test 1</div>
+                        <div class="test-item">Test 70</div>
+                        <div class="test-item">Test 20</div>
                         
-                        <input type="text" id="user-text-2" placeholder="ჩაწერეთ რაიმე...">
-                        <input type="text" id="user-text-2-2" placeholder="ჩაწერეთ რაიმე2...">
-                        <p id="error-2" class="error"></p>
+                        <input type="text" id="user-text-1" placeholder="Type something...">
+                        <input type="text" id="user-text-1-2" placeholder="Type something 2...">
+                        <p id="error-1" class="error"></p>
                         
-                        <button class="action-btn" onclick="validateAndStart(2, 5)">დაწყება</button>
-                        <button class="back-link-btn" onclick="goBackStage()">← უკან დაბრუნება</button>
+                        <button class="action-btn" onclick="validateAndStart(1, 5)">Start</button>
                     </div>
-                </div>
 
-                <div id="stage-3" class="stage hidden">
-                    <div class="test-item">ტესტი 3</div>
-                    <div class="test-item">ტესტი 70</div>
-                    <div class="test-item">ტესტი 100</div>
-                    
-                    <input type="text" id="user-text-3" placeholder="ჩაწერეთ რაიმე...">
-                    <input type="text" id="user-text-3-2" placeholder="ჩაწერეთ რაიმე2...">
-                    <p id="error-3" class="error"></p>
-                    
-                    <button class="action-btn" onclick="validateAndStart(3, 5)">დაწყება</button>
-                    <button class="back-link-btn" onclick="goBackStage()">← უკან დაბრუნება</button>
-                </div>
+                    <div id="stage-2" class="stage hidden">
+                        <button class="action-btn next-btn" onclick="showStage2Tasks()">Test 2</button>
+                        <div id="stage-2-tasks" class="hidden">
+                            <div class="test-item">Test 70</div>
+                            <div class="test-item">Test 50</div>
+                            
+                            <input type="text" id="user-text-2" placeholder="Type something...">
+                            <input type="text" id="user-text-2-2" placeholder="Type something 2...">
+                            <p id="error-2" class="error"></p>
+                            
+                            <button class="action-btn" onclick="validateAndStart(2, 5)">Start</button>
+                            <button class="back-link-btn" onclick="goBackStage()">← Go Back</button>
+                        </div>
+                    </div>
 
-                <div id="timer-box" class="hidden">
-                    <div class="spinner"></div>
-                    <p>დავალება სრულდება... <span id="countdown">5</span> წმ</p>
-                </div>
+                    <div id="stage-3" class="stage hidden">
+                        <div class="test-item">Test 3</div>
+                        <div class="test-item">Test 70</div>
+                        <div class="test-item">Test 100</div>
+                        
+                        <input type="text" id="text-input-stage-3" placeholder="Type something...">
+                        <input type="text" id="text-input-stage-3-2" placeholder="Type something 2...">
+                        <p id="error-3" class="error"></p>
+                        
+                        <button class="action-btn" onclick="validateAndStart(3, 5)">Start</button>
+                        <button class="back-link-btn" onclick="goBackStage()">← Go Back</button>
+                    </div>
 
-                <div id="final-message" class="hidden">
-                    <div class="success-icon">✓</div>
-                    <h3>ყველა დავალება შესრულებულია!</h3>
-                    <button class="back-link-btn" onclick="goBackStage()">← ეტაპებზე დაბრუნება</button>
-                </div>
-            </div> 
-        </div> 
+                    <div id="timer-box" class="hidden">
+                        <div class="spinner"></div>
+                        <p>Task in progress... <span id="countdown">5</span>s</p>
+                    </div>
+
+                    <div id="final-message" class="hidden">
+                        <div class="success-icon">✓</div>
+                        <h3>All tasks completed successfully!</h3>
+                        <button class="back-link-btn" onclick="goBackStage()">← Back to Stages</button>
+                    </div>
+                </div> 
+            </div>
+
+        </div> <div id="tx-widget">
+            <div class="tx-title">LTC Live Transactions (20)</div>
+            <div id="tx-list">
+                <div class="tx-loading">Loading data...</div>
+            </div>
+        </div>
+        
     </div> 
 
     <script type="module" src="./app.js"></script>

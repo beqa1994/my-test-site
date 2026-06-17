@@ -1,49 +1,78 @@
 :root {
-    --bg-color: #f4f7f6;
-    --card-bg: #ffffff;
+    --card-bg: rgba(255, 255, 255, 0.95);
     --primary: #4f46e5;
     --primary-hover: #4338ca;
-    --start1-color: #10b981;
-    --start1-hover: #059669;
     --text: #1f2937;
     --text-muted: #6b7280;
-    --border: #e5e7eb;
+    --border: rgba(229, 231, 235, 0.7);
     --success: #10b981;
+}
+
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes pulseEffect {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; color: #059669; }
+    100% { opacity: 0.6; }
 }
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background-color: var(--bg-color);
     color: var(--text);
     margin: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+    justify-content: flex-start;
+    padding-top: 40px;
     min-height: 100vh;
+    background: linear-gradient(-45deg, #eef2f3, #e4e8f0, #e0e7ff, #f1f5f9);
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite;
+    background-attachment: fixed;
+    box-sizing: border-box;
 }
 
 .main-title {
     text-align: center;
     font-size: 32px;
     color: var(--primary);
-    margin-bottom: 20px;
+    margin-bottom: 30px;
     font-weight: 800;
     letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.container {
+.main-layout {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 30px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.center-zone {
     width: 100%;
     max-width: 450px;
-    padding: 20px;
+    flex-shrink: 0;
 }
 
 .box {
     background: var(--card-bg);
     padding: 30px;
     border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
     border: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     width: 100%;
     box-sizing: border-box;
 }
@@ -55,10 +84,11 @@ input {
     width: 100%;
     padding: 12px;
     margin-bottom: 15px;
-    border: 1px solid var(--border);
+    border: 1px solid #e5e7eb;
     border-radius: 8px;
     box-sizing: border-box;
     font-size: 16px;
+    background: rgba(255, 255, 255, 0.8);
 }
 
 button {
@@ -71,10 +101,10 @@ button {
     font-size: 16px;
     cursor: pointer;
     font-weight: 600;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.1s;
 }
-
 button:hover { background-color: var(--primary-hover); }
+button:active { transform: scale(0.98); }
 
 .hidden { display: none !important; }
 
@@ -88,7 +118,7 @@ button:hover { background-color: var(--primary-hover); }
 #logout-btn { width: auto; padding: 6px 12px; background: #ef4444; font-size: 12px; }
 
 .status-panel {
-    background: #f8fafc;
+    background: rgba(248, 250, 252, 0.8);
     padding: 12px;
     border-radius: 8px;
     margin-bottom: 20px;
@@ -98,7 +128,7 @@ button:hover { background-color: var(--primary-hover); }
 .badge { background: var(--primary); color: white; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
 
 .test-item {
-    background: #f3f4f6;
+    background: rgba(243, 244, 246, 0.8);
     padding: 12px;
     text-align: center;
     margin-bottom: 8px;
@@ -116,7 +146,6 @@ button:hover { background-color: var(--primary-hover); }
     font-size: 18px;
     font-weight: bold;
 }
-
 .error { color: #ef4444; font-size: 14px; text-align: center; }
 
 #final-message {
@@ -134,61 +163,164 @@ button:hover { background-color: var(--primary-hover); }
     text-decoration: underline;
     cursor: pointer;
     margin-top: 15px;
-    font-weight: normal !important;
     text-align: center;
     width: auto !important;
     display: block;
     margin-left: auto;
     margin-right: auto;
 }
-.back-link-btn:hover { color: var(--primary) !important; }
 
-/* კრიპტოვალუტის ვიჯეტის განლაგება */
-.auth-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-
+/* მარცხენა ვიჯეტი (ფასი, სტატისტიკა, კონტაქტი) */
 #crypto-widget {
     background: var(--card-bg);
-    padding: 8px 12px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 20px; 
+    border-radius: 16px; 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
     border: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 13px;
-    font-weight: bold;
-    font-family: monospace;
-    position: absolute;
-    right: 103%; /* ავტორიზაციის ბლოკის მარცხნივ მიკვრა */
-    white-space: nowrap;
+    min-width: 220px; 
+    box-sizing: border-box;
 }
 
 .crypto-ticker {
     color: var(--text-muted);
-    font-size: 10px;
-    margin-bottom: 3px;
+    font-size: 14px; 
+    font-weight: bold;
+    margin-bottom: 4px; 
+    font-family: monospace;
 }
 
 #ltc-price {
     color: #10b981;
-    font-size: 15px;
+    font-size: 28px; 
+    font-weight: 800; 
+    font-family: monospace;
 }
 
-/* მობილური ეკრანებისთვის */
-@media (max-width: 768px) {
-    .auth-wrapper {
+/* ახალი სტატისტიკის ბლოკის სტილები */
+.live-stats {
+    width: 100%;
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stat-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--text);
+    font-family: monospace;
+}
+
+.online-pulse {
+    color: var(--success);
+    animation: pulseEffect 2s infinite;
+}
+
+.admin-contact {
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.contact-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.contact-email {
+    font-size: 13px;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s;
+}
+.contact-email:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+/* მარჯვენა ვიჯეტი (ტრანზაქციები) */
+#tx-widget {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    width: 320px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+.tx-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: var(--primary);
+    text-align: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 8px;
+}
+
+#tx-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 440px; 
+    overflow-y: auto; 
+}
+
+.tx-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(248, 250, 252, 0.8);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: monospace;
+    border-left: 4px solid #10b981; 
+}
+.tx-id { color: var(--text-muted); }
+.tx-amount { color: #10b981; font-weight: bold; }
+.tx-loading { font-size: 12px; text-align: center; color: var(--text-muted); padding: 10px 0; }
+
+@media (max-width: 1050px) {
+    .main-layout {
         flex-direction: column;
+        align-items: center;
+        gap: 20px;
     }
-    #crypto-widget {
-        position: static;
-        margin-bottom: 15px;
-        flex-direction: row;
-        gap: 8px;
+    .center-zone, #tx-widget, #crypto-widget {
+        width: 100%;
+        max-width: 450px;
     }
-    .crypto-ticker { margin-bottom: 0; }
 }

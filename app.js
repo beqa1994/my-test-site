@@ -41,20 +41,31 @@ const statRegistered = document.getElementById('stat-registered');
 const statVisits = document.getElementById('stat-visits');
 const statOnline = document.getElementById('stat-online');
 
-const sessionToken = Math.random().toString(36).substring(2, 15);
-
+let sessionToken = sessionStorage.getItem("my_platform_session");
+if (!sessionToken) {
+    sessionToken = Math.random().toString(36).substring(2, 15);
+    sessionStorage.setItem("my_platform_session", sessionToken);
+}
 function initLiveStats() {
     try {
+        // Total Registered: ითვლის დოკუმენტებს 'users' კოლექციაში
         onSnapshot(collection(db, "users"), (snapshot) => {
-            if(statRegistered) statRegistered.innerText = snapshot.size;
-        });
-
-        onSnapshot(doc(db, "system_stats", "counters"), (docSnap) => {
-            if (docSnap.exists() && statVisits) {
-                statVisits.innerText = docSnap.data().totalVisits || 0;
+            if(statRegistered) {
+                statRegistered.innerText = snapshot.size;
             }
         });
 
+        // Total Visits: ითვლის სისტემურ ქაუნთერს
+        onSnapshot(doc(db, "system_stats", "counters"), (docSnap) => {
+            if (docSnap.exists() && statVisits) {
+                const data = docSnap.data();
+                statVisits.innerText = data.totalVisits || 0;
+            } else {
+                console.log("No such document in system_stats/counters!");
+            }
+        });
+
+        // Online Users: 15 წამში ერთხელ ვამოწმებთ აქტივობას
         onSnapshot(collection(db, "online_sessions"), (snapshot) => {
             const now = Date.now();
             let activeUsersCount = 0;
@@ -73,11 +84,20 @@ function initLiveStats() {
 
 function startHeartbeat() {
     const sessionRef = doc(db, "online_sessions", sessionToken);
+    
+    // გვერდიდან გასვლისას (დახურვა/რეფრეში) ვცადოთ ჩანაწერის წაშლა
+    window.addEventListener('beforeunload', () => {
+        // Firebase-ში ჩანაწერის წაშლა რეალურ დროში
+        // (შენიშვნა: წაშლა ზოგჯერ შეიძლება დაიბლოკოს, ამიტომ Heartbeat პრინციპი ჯობია)
+    });
+
     const sendSignal = () => {
+        // ვუგზავნით ბოლო აქტივობის დროს
         setDoc(sessionRef, { lastActive: Date.now() }, { merge: true }).catch(() => {});
     };
+    
     sendSignal();
-    setInterval(sendSignal, 8000);
+    setInterval(sendSignal, 8000); // ყოველ 8 წამში ვაახლებთ სტატუსს
 }
 
 // გამოსწორებული უნიკალური ვიზიტები - არ მოემატება ყოველ რეფრეშზე

